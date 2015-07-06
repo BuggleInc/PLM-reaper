@@ -4,17 +4,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.JFrame;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
+import plm.core.model.Game;
 import core.LocalRepository;
 import core.RepoIterator;
 import core.Student;
 
 public class Main {
-	public static void main(String[] args) throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+	public static void main(String[] args) throws IOException, InvalidRemoteException, TransportException, GitAPIException, ExecutionException {
 		if(args.length == 1) {
 			if(args[0].equals("-c") || args[0].equals("-clone")) {
 				Path path = Paths.get("repo");
@@ -38,18 +42,23 @@ public class Main {
 		ite.addValidBranch("refs/remotes/origin/PLM0266985b7338b528ca1a1cd97ab0d032ee5af2f4");
 		ite.addValidBranch("refs/remotes/origin/PLM065351a5aa002f465d5dd23648dcdfa1ec46b000");
 		ite.addValidBranch("refs/remotes/origin/PLM02d0f5013b796ce1f9245ebe995451edea2447d2");*/
+		//ite.addValidBranch("refs/remotes/origin/PLMb9c5556003558a5aa5b5a48239a456e8c0171f17");
 		ite.setCollectCode(true);
 		ite.setCollectError(true);
 		int nbBranch = 0;
 		int nbFails = 0;
+		
+		MockLogHandler log = new MockLogHandler();
+		Game g = new Game("test", log, new JFrame().getLocale(), Game.JAVA.getLang(), false);
 		while(ite.hasNext()) {
 			Student student = ite.next();
 			if(student != null) {
 				BrowseAndExecute bae = new BrowseAndExecute();
-				nbFails = bae.getCode(student, nbBranch, nbFails);
+				nbFails = bae.getCode(g, student, nbBranch, nbFails);
 				nbBranch++;
 			}
 		}
-		System.out.println("========== Execution finished!!! ==========");
+		
+		System.out.println("========= Execution finished!!! ==========");
 	}
 }
