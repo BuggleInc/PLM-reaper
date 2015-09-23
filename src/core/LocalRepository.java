@@ -26,18 +26,18 @@ import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 public class LocalRepository {
 	private static final String path = "repo/";
-	private static final String REMOTE_URL = "https://github.com/mquinson/PLM-data.git";
+	private static final String REMOTE_URL = "https://github.com/BuggleInc/PLM-data.git";
 	private static Repository repo = null;
 	
 	public static void cloneRepo() throws InvalidRemoteException, TransportException, GitAPIException{		
 		File repo = new File(path);
-		if(!repo.exists())
-			repo.mkdir();
-		
+		if(repo.exists())
+			return;
+		repo.mkdir();
 		System.err.println("Cloning from " + REMOTE_URL + " to " + path);
 		Git.cloneRepository().setURI(REMOTE_URL).setDirectory(repo).call();
 	}
-
+	
 	public static void fetch(){
 		try {
 			Repository repo = FileRepositoryBuilder.create(new File(path + "/.git"));

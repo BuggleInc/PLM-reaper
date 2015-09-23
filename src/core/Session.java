@@ -1,7 +1,6 @@
 package core;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 
 
@@ -10,7 +9,6 @@ public class Session {
 	private Collection<Event> events;
 	private Instant sessionStart, sessionEnd, currentLimitSession;
 	private static int maxMinuteSession = 120;
-	//private String exoName;
 	
 	public Session(Event e){
 		events = new ArrayList<Event>();
