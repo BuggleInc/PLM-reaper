@@ -17,14 +17,14 @@ import com.google.gson.JsonParser;
 
 public class Event implements Comparable<Event> {
 
-	
+
 	private RevCommit commit;
 	private String commitLog;
 	private Instant commitTime;
 	private String commitType;
 	public final static String Management = "mangement commit", Switch = "switch", Reverted = "reverted", Executed = "executed", 
-						Start = "start", Started = "started", Leaved = "leaved", ReadTip = "readtip", CallHelp = "callHelp",
-						CancelCallHelp = "cancel call for help", Idle="idle", Unhandled = "unhandled";
+			Start = "start", Started = "started", Leaved = "leaved", ReadTip = "readtip", CallHelp = "callHelp",
+			CancelCallHelp = "cancel call for help", Idle="idle", Unhandled = "unhandled", Feedback="commonErrorFeedback";
 	private String  resultCompil;
 	public final static String Success = "success", Failed = "failed", CompilError = "compilation error";
 	private String os, plm_version, java_version;
@@ -62,89 +62,113 @@ public class Event implements Comparable<Event> {
 		betaVersions.add("2.6-pre (20150202)");		
 		betaVersions.add("internal (internal)");
 	}
-	
-	
+
+
 	public Event(RevCommit commit){
 		this.commit = commit;
 		this.commitTime = Instant.ofEpochMilli(commit.getCommitTime() * 1000L);
 		this.commitLog = commit.getFullMessage();
 		this.IdCommit = commit.getId().toString();
 	}
-	
+
 	public void setGlobalInfo(){
-			if (commitLog.equals("Create README.md") ||
+		if (commitLog.equals("Create README.md") ||
 				commitLog.equals("Empty initial commit")||
 				commitLog.equals("Initial commit")||
 				commitLog.equals("manual merge\n")||
 				commitLog.equals("Manual merging")||
 				commitLog.startsWith("Merge remote-tracking branch 'origin/PLM")||
 				(commitLog.startsWith("Merge branch 'PLM") && commitLog.contains("https://github.com/mquinson/PLM-data.git into")) ) {
-				commitType = Management;
-				return;
-			}	
-			
-			JsonParser jsonParser = new JsonParser();
-			JsonObject jo = (JsonObject) jsonParser.parse(commitLog);
-			String kind = jo.get("kind").getAsString();
-			
-			if(jo.get("plm") !=  null){
-				if (! validVersions.contains(jo.get("plm").getAsString()) ){
-					usesBeta = true;
-					if (! betaVersions.contains(jo.get("plm").getAsString()) ) 
-						usesUnhandledBeta = true;
-					//System.out.println("\nUnhandled version name: "+  jo.get("plm").getAsString()) ;
-				}
-			}			
+			commitType = Management;
+			return;
+		}	
 
-			
-			switch(kind){
-			case "switched":
-				commitType = Switch;
-				exoSwitchTo = jo.get("switchto").getAsString();
-				break;
-			case "reverted":
-				commitType = Reverted;
-				break;
-			case "executed":
-				commitType = Executed;
-				this.setExecutedInfo(jo);
-				break;
-			case "start":
-				commitType = Start;
-			case "started":
-				commitType = Started;
-				os = jo.get("os").getAsString();
-				plm_version = jo.get("plm").getAsString();
-				java_version = jo.get("java").getAsString();
-				break;
-			case "leaved":
-				commitType = Leaved;
-				os = jo.get("os").getAsString();
-				plm_version = jo.get("plm").getAsString();
-				java_version = jo.get("java").getAsString();
-				break;
-			case "readTip":
-				commitType = ReadTip;
-				break;
-			case "callForHelp":
-				commitType = CallHelp;
-				break;				
-			case "cancelCallForHelp":
-				commitType = CancelCallHelp;
-				break;
-			case "idle":
-				commitType = Idle;
-				idleStart = Instant.parse(jo.get("start").getAsString());
-				idleEnd = Instant.parse(jo.get("end").getAsString());
-				break;
-			default:
-				commitType= Unhandled;
-			}			
-			
-			if(jo.has("exo"))
-				exoName = jo.get("exo").getAsString();
-			else
-				exoName = "";
+		JsonObject jo;
+		JsonParser jsonParser = new JsonParser();
+		try {
+			jo = (JsonObject) jsonParser.parse(commitLog);
+
+		} catch (Exception e) {
+			// TODO: handle exception
+
+			if(commitLog.substring(0, "{\"kind\" : \"executed\"\"".length()).equals("{\"kind\" : \"executed\"\"")){
+				commitLog = "{\"kind\" : \"executed\",\"" + commitLog.substring("{\"kind\" : \"executed\"\"".length());
+				//System.out.println(commitLog);
+				jo = (JsonObject) jsonParser.parse(commitLog);
+			}
+			else{				
+				System.out.println("erreur de parser : " + this.IdCommit);
+				this.commitType = "parserError";
+				return;
+			}
+		}
+		String kind = jo.get("kind").getAsString();
+
+		if(jo.get("plm") !=  null){
+			if (! validVersions.contains(jo.get("plm").getAsString()) ){
+				usesBeta = true;
+				if (! betaVersions.contains(jo.get("plm").getAsString()) ) 
+					usesUnhandledBeta = true;
+				//System.out.println("\nUnhandled version name: "+  jo.get("plm").getAsString()) ;
+			}
+		}			
+
+
+		switch(kind){
+		case "switched":
+			commitType = Switch;
+			exoSwitchTo = jo.get("switchto").getAsString();
+			break;
+		case "reverted":
+			commitType = Reverted;
+			break;
+		case "executed":
+			commitType = Executed;
+			this.setExecutedInfo(jo);
+			break;
+		case "start":
+			commitType = Start;
+			os = jo.get("os").getAsString();
+			plm_version = jo.get("plm").getAsString();
+			java_version = jo.get("java").getAsString();
+			break;
+		case "started":
+			commitType = Started;
+			os = jo.get("os").getAsString();
+			plm_version = jo.get("plm").getAsString();
+			java_version = jo.get("java").getAsString();
+			break;
+		case "leaved":
+			commitType = Leaved;
+			os = jo.get("os").getAsString();
+			plm_version = jo.get("plm").getAsString();
+			java_version = jo.get("java").getAsString();
+			break;
+		case "readTip":
+			commitType = ReadTip;
+			break;
+		case "callForHelp":
+			commitType = CallHelp;
+			break;				
+		case "cancelCallForHelp":
+			commitType = CancelCallHelp;
+			break;
+		case "idle":
+			commitType = Idle;
+			idleStart = Instant.parse(jo.get("start").getAsString());
+			idleEnd = Instant.parse(jo.get("end").getAsString());
+			break;
+		case "commonErrorFeedback":
+			commitType = Feedback;
+			break;
+		default:
+			commitType= Unhandled;
+		}			
+
+		if(jo.has("exo"))
+			exoName = jo.get("exo").getAsString();
+		else
+			exoName = "";
 	}
 
 	private void setExecutedInfo(JsonObject jo){
@@ -162,7 +186,7 @@ public class Event implements Comparable<Event> {
 				break;
 			}			
 		}
-		
+
 		exoLang = jo.get("lang").getAsString();
 
 		if (jo.has("totaltests"))
@@ -178,8 +202,8 @@ public class Event implements Comparable<Event> {
 			}
 		}
 	}
-	
-	
+
+
 	static Map<String,String> langExt=null;
 	static private void initLangExt() {
 		langExt = new HashMap<String, String>();
@@ -190,7 +214,7 @@ public class Event implements Comparable<Event> {
 		langExt.put("lightbot","ignored");
 		langExt.put("Blockly", "blockly");
 	}
-	
+
 	public void setCode() throws MissingObjectException, IncorrectObjectTypeException, CorruptObjectException, IOException {
 		if(langExt==null)
 			initLangExt();
@@ -204,9 +228,22 @@ public class Event implements Comparable<Event> {
 		String path = this.exoName + "." + langExt.get(this.exoLang) + ".error" ;
 		error = LocalRepository.getFileContent(path, this.commit);
 	}
-	
-	
-	
+
+
+
+	private Event(){}
+
+	public static Event getIdleEVent(Instant start, Instant end){
+		Event evt = new Event();
+
+		evt.setCommitType(Event.Idle);
+		evt.setCommitTime(start);
+		evt.setIdleStart(start);
+		evt.setIdleEnd(end);		
+		return evt;	
+	}
+
+
 	@Override
 	public String toString() {
 		return "Event [commit=" + "commit" + ", commitLog=" + "commitLog"
@@ -218,7 +255,7 @@ public class Event implements Comparable<Event> {
 				+ ", exoName=" + exoName + ", exoLang=" + exoLang
 				+ ", outCome=" + "outCome" + ", code=" + "code" + "]";
 	}
-	
+
 	public void printEvent(){
 		Instant cal = this.getCommitTime();
 		String date = cal.toString(); //cal.get(Calendar.DATE) + "/" +cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR) + " " + cal.get(Calendar.HOUR) + ":" + cal.get(Calendar.MINUTE);
@@ -231,9 +268,9 @@ public class Event implements Comparable<Event> {
 			System.out.println("Start "  + "   / id : " + getIdCommit().substring(6,16)  + " date : " + date );
 		else
 			System.out.println("erreur : "+ getCommitType()   + "   / id : " + getIdCommit().substring(6,16)  + " date : " + date );
-		}
+	}
 
-	
+
 	@Override
 	public int compareTo(Event e) {
 		return this.commitTime.compareTo(e.getCommitTime());
@@ -278,7 +315,7 @@ public class Event implements Comparable<Event> {
 	public String getIdCommit() {
 		return IdCommit;
 	}
-	
+
 	public String getError() {
 		return error;
 	}
@@ -298,8 +335,28 @@ public class Event implements Comparable<Event> {
 	public Instant getIdleEnd() {
 		return idleEnd;
 	}
-	
-	
 
-	
+	private void setIdleStart(Instant idleStart) {
+		this.idleStart = idleStart;
+	}
+
+	private void setIdleEnd(Instant idleEnd) {
+		this.idleEnd = idleEnd;
+	}
+
+	private void setCommitTime(Instant commitTime) {
+		this.commitTime = commitTime;
+	}
+
+	private void setCommitType(String commitType) {
+		this.commitType = commitType;
+	}
+
+	public RevCommit getCommit() {
+		return commit;
+	}
+
+
+
+
 }

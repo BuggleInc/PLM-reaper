@@ -8,7 +8,7 @@ import java.util.Iterator;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-public class RepoIterator {
+public class RepoIterator{
 	
 	private String partialExoName; // collect event only with exoName or with exoName starting with partial exoName
 	private ArrayList<String> exoName, exoNameExact; // list of valid exoname for event , list of valid exoname that must have been tried by the student to be valid 
@@ -53,14 +53,18 @@ public class RepoIterator {
 		if(validBranch != null && !validBranch.contains(branch.getName()))
 			return null;
 		
-		Student student = new Student(branch.getName());
-		Collection<RevCommit> commits = LocalRepository.getCommits(branch.getName());
+		return getStudent(branch.getName());
+		
+	}
+
+	public Student getStudent(String branchName) throws IOException{
+		Student student = new Student(branchName);
+		Collection<RevCommit> commits = LocalRepository.getCommits(branchName);
 		Boolean unhandledBeta = false ;
 		for(RevCommit commit : commits){ //browse all commit of the student			
 			Event temp = new Event(commit);
 			if(testConstruct(temp))
 				continue;
-
 			temp.setGlobalInfo();
 			if(temp.getUsesUnhandledBeta()){ // no need to parse this student any further
 				unhandledBeta = true;
@@ -93,12 +97,19 @@ public class RepoIterator {
 			return true;	
 		
 		return false;
-	}
 
+		
+		
+	}
+	
+	
+	
+	
 	private Boolean testConstruct(Event e){ // test if the commit is conform to the option after the construction of the event
-		if(dateMin != null && dateMin.after(e.getCommitTime()))
-			return true;
-		if(dateMax != null && dateMax.before(e.getCommitTime()))
+		if(dateMin != null && dateMin.toInstant().compareTo(e.getCommitTime())>0){
+			return true;	
+		}
+		if(dateMax != null && dateMax.toInstant().compareTo(e.getCommitTime())<0)
 			return true;		
 		
 		return false;

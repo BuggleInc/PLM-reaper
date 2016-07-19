@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
+
 public class Student {
 	
 	private List<Event> events;
@@ -22,6 +23,7 @@ public class Student {
 	public void addEvent(Event e){
 		events.add(e);
 	}
+	
 	
 	public void sortEvent(){
 		if(!isSort){
