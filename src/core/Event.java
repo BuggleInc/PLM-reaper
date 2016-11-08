@@ -22,9 +22,21 @@ public class Event implements Comparable<Event> {
 	private String commitLog;
 	private Instant commitTime;
 	private String commitType;
-	public final static String Management = "mangement commit", Switch = "switch", Reverted = "reverted", Executed = "executed", 
-			Start = "start", Started = "started", Leaved = "leaved", ReadTip = "readtip", CallHelp = "callHelp",
-			CancelCallHelp = "cancel call for help", Idle="idle", Unhandled = "unhandled", Feedback="commonErrorFeedback";
+	
+	public final static String Management = "mangement commit";
+	public final static String Switch = "switch";
+	public final static String Reverted = "reverted";
+	public final static String Executed = "executed";
+	public final static String Start = "start";
+	public final static String Started = "started";
+	public final static String Leaved = "leaved";
+	public final static String ReadTip = "readtip";
+	public final static String CallHelp = "callHelp";
+	public final static String CancelCallHelp = "cancel call for help";
+	public final static String Idle="idle";
+	public final static String Unhandled = "unhandled";
+	public final static String Feedback="commonErrorFeedback";
+	
 	private String  resultCompil;
 	public final static String Success = "success", Failed = "failed", CompilError = "compilation error";
 	private String os, plm_version, java_version;
@@ -76,12 +88,23 @@ public class Event implements Comparable<Event> {
 				commitLog.equals("Empty initial commit")||
 				commitLog.equals("Initial commit")||
 				commitLog.equals("manual merge\n")||
+				commitLog.equals("Manual merge\n")||
 				commitLog.equals("Manual merging")||
+				commitLog.equals("fix\n")||
 				commitLog.startsWith("Merge remote-tracking branch 'origin/PLM")||
-				(commitLog.startsWith("Merge branch 'PLM") && commitLog.contains("https://github.com/mquinson/PLM-data.git into")) ) {
+				(commitLog.startsWith("Merge branch 'PLM") && commitLog.contains("https://github.com/mquinson/PLM-data.git into"))||  
+				(commitLog.startsWith("Merge branch 'PLM") && commitLog.contains("https://github.com/BuggleInc/PLM-data into")) 
+		){
 			commitType = Management;
 			return;
 		}	
+		
+		// Some commit logs are faulty with a pair of "" too much
+        commitLog = commitLog.replaceAll("executed\"\"","executed\",\"");
+        // commonErrorFeedback was missing a pair of quotes in a bunch of commits
+        commitLog = commitLog.replaceAll("\"exoID\":Stocker et manipuler des données,","\"exoID\":\"Stocker et manipuler des données\",");
+        commitLog = commitLog.replaceAll("\"exoID\":Stairway to Heaven,","\"exoID\":\"Stairway to Heaven\",");
+        commitLog = commitLog.replaceAll("\"exoID\":Storing and manipulating data,","\"exoID\":\"Storing and manipulating data\",");
 
 		JsonObject jo;
 		JsonParser jsonParser = new JsonParser();
@@ -89,18 +112,9 @@ public class Event implements Comparable<Event> {
 			jo = (JsonObject) jsonParser.parse(commitLog);
 
 		} catch (Exception e) {
-			// TODO: handle exception
-
-			if(commitLog.substring(0, "{\"kind\" : \"executed\"\"".length()).equals("{\"kind\" : \"executed\"\"")){
-				commitLog = "{\"kind\" : \"executed\",\"" + commitLog.substring("{\"kind\" : \"executed\"\"".length());
-				//System.out.println(commitLog);
-				jo = (JsonObject) jsonParser.parse(commitLog);
-			}
-			else{				
-				System.out.println("erreur de parser : " + this.IdCommit);
-				this.commitType = "parserError";
-				return;
-			}
+			System.out.println("Parse error: " + this.IdCommit + "\n>>"+commitLog+"<<");
+			this.commitType = "parserError";
+			return;
 		}
 		String kind = jo.get("kind").getAsString();
 
@@ -117,7 +131,14 @@ public class Event implements Comparable<Event> {
 		switch(kind){
 		case "switched":
 			commitType = Switch;
-			exoSwitchTo = jo.get("switchto").getAsString();
+			if (jo.get("switchto") != null) {
+				exoSwitchTo = jo.get("switchto").getAsString();
+			} else if (jo.get("switchTo") != null)
+				exoSwitchTo = jo.get("switchTo").getAsString();
+			else {
+				System.out.println("Fail to find the exercise to which we switched: "+jo);
+				System.exit(1);
+			}
 			break;
 		case "reverted":
 			commitType = Reverted;

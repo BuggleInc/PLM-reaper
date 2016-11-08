@@ -45,8 +45,8 @@ public class LocalRepository {
 			new Git(repo).fetch().setCheckFetchedObjects(true).call();
 			repo.close();
 		} catch (IOException | GitAPIException e1) {
-			// TODO Bloc catch généré automatiquement
 			e1.printStackTrace();
+			System.exit(1);
 		}
 	}
 	
@@ -116,7 +116,6 @@ public class LocalRepository {
 			return out.toString();
 		} 
 		catch (IOException e) {
-			// TODO Bloc catch généré automatiquement
 			e.printStackTrace();
 			return null;
 		}

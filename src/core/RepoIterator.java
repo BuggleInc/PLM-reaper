@@ -27,8 +27,7 @@ public class RepoIterator{
 		size = temp.size();
 		iterator = temp.iterator();
 		i = 0;
-		System.out.println("Parse "+size+" branchs. This may take a few seconds.");
-
+		System.out.println("Parse "+size+" branchs. This will take some time.");
 	}
 
 	public boolean hasNext(){
@@ -97,12 +96,7 @@ public class RepoIterator{
 			return true;	
 		
 		return false;
-
-		
-		
 	}
-	
-	
 	
 	
 	private Boolean testConstruct(Event e){ // test if the commit is conform to the option after the construction of the event
