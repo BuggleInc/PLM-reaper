@@ -1,45 +1,14 @@
 package core;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.time.Instant;
-import java.time.Year;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Vector;
-
-import javax.swing.JFrame;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;	
-import org.eclipse.jgit.lib.Ref;
-import org.neuroph.core.data.DataSet;
-import org.neuroph.core.data.DataSetRow;
-import org.neuroph.nnet.MultiLayerPerceptron;
-import org.neuroph.util.TransferFunctionType;
-
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion.User;
-
-import core.Event;
-import core.RepoIterator;
-import core.Student;
-import plm.core.lang.ProgrammingLanguage;
-import plm.core.model.Game;
-import plm.core.model.lesson.Exercise;
-import plm.core.model.lesson.Exercise.WorldKind;
-import plm.universe.World;
+import org.eclipse.jgit.api.errors.TransportException;
 
 
 

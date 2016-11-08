@@ -5,24 +5,12 @@ import java.util.Calendar;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;	
-import org.eclipse.jgit.lib.Ref;
-import org.neuroph.core.data.DataSet;
-import org.neuroph.core.data.DataSetRow;
-import org.neuroph.nnet.MultiLayerPerceptron;
-import org.neuroph.util.TransferFunctionType;
-
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion.User;
+import org.eclipse.jgit.api.errors.TransportException;
 
 import core.Event;
 import core.LocalRepository;
 import core.RepoIterator;
 import core.Student;
-import plm.core.lang.ProgrammingLanguage;
-import plm.core.model.Game;
-import plm.core.model.lesson.Exercise;
-import plm.core.model.lesson.Exercise.WorldKind;
-import plm.universe.World;
 
 
 public class BasicStat {
