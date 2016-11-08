@@ -6,8 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.JFrame;
-
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -48,8 +46,8 @@ public class Main {
 		int nbBranch = 0;
 		int nbFails = 0;
 		
-		MockLogHandler log = new MockLogHandler();
-		Game g = new Game("test", log, new JFrame().getLocale(), Game.JAVA.getLang(), false);
+		//MockLogHandler log = new MockLogHandler();
+		Game g = Game.getInstance();// new Game("test", log, new JFrame().getLocale(), Game.JAVA.getLang(), false);
 		while(ite.hasNext()) {
 			Student student = ite.next();
 			if(student != null) {

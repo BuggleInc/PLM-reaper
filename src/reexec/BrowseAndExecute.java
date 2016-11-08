@@ -85,7 +85,7 @@ public class BrowseAndExecute {
 		g.setBatchExecution();
 
 		g.setLocale(new Locale("en"));
-		g.setProgrammingLanguage(lang.getLang());
+		g.setProgramingLanguage(lang);
 		g.switchLesson(lessonID, true);
 		g.getCurrentLesson().setCurrentExercise(exoID);
 
@@ -99,7 +99,8 @@ public class BrowseAndExecute {
 		Future<String> f = exec.submit(new Callable<String>() {
 			public String call() throws Exception {
 				g.startExerciseExecution();
-				Game.waitRunners();
+				Game.waitInitThreads();
+				//Game.waitRunners();
 				return "";
 			}
 		});
