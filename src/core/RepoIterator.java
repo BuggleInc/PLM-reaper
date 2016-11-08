@@ -16,6 +16,7 @@ public class RepoIterator{
 	private ArrayList<String> commitType; //collect event only with a type in commitType
 	private Calendar dateMin, dateMax; // collect event only after and/or before dateMin/DateMax
 	private boolean collectCode = false, collectError = false; //get the code/error of the commit ?
+	private boolean quiet = false; // don't output anything
 	
 	//	private Collection<Ref> branchs ;
 	private Iterator<Ref> iterator;
@@ -27,7 +28,8 @@ public class RepoIterator{
 		size = temp.size();
 		iterator = temp.iterator();
 		i = 0;
-		System.out.println("Parse "+size+" branchs. This will take some time.");
+		if (!quiet)
+			System.out.println("The repository contains "+size+" branchs overall.");
 	}
 
 	public boolean hasNext(){
@@ -43,13 +45,14 @@ public class RepoIterator{
 	public Student next() throws IOException{
 		Ref branch = iterator.next();
 		i++;
-		if (i % 150 == 0)
-			System.out.println(". "+i+"/"+size);
-		else
-			System.out.print(".");
-
+		if (!quiet) {
+			if (i % 150 == 0)
+				System.out.println(". "+i+"/"+size);
+			else
+				System.out.print(".");
+		}
 		
-		if(validBranch != null && !validBranch.contains(branch.getName()))
+		if (validBranch != null && !validBranch.contains(branch.getName()))
 			return null;
 		
 		return getStudent(branch.getName());
@@ -81,10 +84,8 @@ public class RepoIterator{
 
 			student.addEvent(temp);			
 		}
-		if(!unhandledBeta)
-			if(student.getEvents().size()>0)
-				if(!testStudent(student))
-					return student;
+		if (!unhandledBeta && student.getEvents().size()>0 && !testStudent(student))
+			return student;
 		
 		return null;
 	}
@@ -221,6 +222,10 @@ public class RepoIterator{
 	public void setCollectError(boolean collectError) {
 		this.collectError = collectError;
 	}
+	public void quiet()  {
+		this.quiet = true;
+	}
+	
 
 	public void setValidBranch(ArrayList<String> validBranch) {
 		this.validBranch = validBranch;
