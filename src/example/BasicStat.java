@@ -1,7 +1,6 @@
 package example;
 
 import java.io.IOException;
-import java.util.Calendar;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -27,7 +26,6 @@ public class BasicStat {
 		//option for the iterator
 		ite.setCollectCode(true);
 		ite.setCollectError(true);
-		ite.quiet();
 
 		ite.addCommitType(Event.Executed);
 
@@ -38,35 +36,68 @@ public class BasicStat {
 		*/
 
 		int activeBranch = 0;
-		int nbreExec = 0;
-		while(ite.hasNext() && activeBranch < 5){
+		double scala= 0;
+		double python = 0;
+		double C = 0;
+		double java = 0;
+		double lightbot = 0;
+		double blockly = 0;
+
+		int failedAttempts = 0;
+		int compilErrors = 0;
+		int succeed = 0;
+
+		while(ite.hasNext()){
 			Student student = ite.next();
 			if (student != null) {
-				System.out.println(activeBranch+": "+student.getBranchName());
-				for (String exoName : student.getTriedExoName()) {
-					int failedAttempts = 0;
-					int compilErrors = 0;
-					int succeed = 0;
-					for (Event evt: student.getEventsByExo(exoName)) {						
-						if (evt.getResultCompil().equals("compilation error"))
-							compilErrors++;
-						else if (evt.getResultCompil().equals("failed"))
-							failedAttempts++;
-						else if (evt.getResultCompil().equals("success"))
-							succeed++;
-						else {
-							System.out.println(exoName+": "+evt);
-							System.exit(1);
-						}
+
+				for (Event evt: student.getEvents()) {
+					if (evt.getExoLang().equals("Scala")) 
+						scala++;
+					else if (evt.getExoLang().equals("Python"))
+						python++;
+					else if (evt.getExoLang().equals("Java"))
+						java++;
+					else if (evt.getExoLang().equals("C"))
+						C++;
+					else if (evt.getExoLang().equals("Blockly"))
+						blockly++;
+					else if (evt.getExoLang().equals("lightbot"))
+						lightbot++;
+					else {
+						System.out.println("Lang = "+evt.getExoLang());
+						System.exit(1);
 					}
-					System.out.println(exoName+": "+ compilErrors+","+failedAttempts+","+succeed);
+					
+					if (evt.getResultCompil().equals("compilation error"))
+						compilErrors++;
+					else if (evt.getResultCompil().equals("failed"))
+						failedAttempts++;
+					else if (evt.getResultCompil().equals("success"))
+						succeed++;
+					else {
+						System.out.println(evt);
+						System.exit(1);
+					}
+
 				}
-				nbreExec += student.getEvents().size();
 				activeBranch ++;
 			}
 		}
+		double total = scala+python+java+C;
+		System.out.println("\nScala: "+scala+" ("+((int)(100*scala/total))+"%); "+
+				           "Python: "+python+" ("+((int)(100*python/total))+"%); "+
+				           "Java: "+java+" ("+((int)(100*java/total))+"%); "+
+				           "Blockly: "+blockly+" ("+((int)(100*blockly/total))+"%); "+
+				           "lightbot: "+lightbot+"; "+
+				           "C:"+C+" ("+((int)(100*C/total))+"%)");
+		total = compilErrors+failedAttempts+succeed;
+		System.out.println("compilation errors: "+ compilErrors+" ("+(int)(100*compilErrors/total)+"%), "
+				+ "logical errors: "+failedAttempts+" ("+(int)(100*failedAttempts/total)+"%), "
+				+ "succeeded: "+succeed+" ("+(int)(100*succeed/total)+"%)");
 
-		System.out.println("\n branche active : " + activeBranch + " exec : " + nbreExec);
+		
+		System.out.println("\nExplored "+activeBranch+" active branchs.");
 
 	}
 }
