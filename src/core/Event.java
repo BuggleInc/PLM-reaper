@@ -241,6 +241,8 @@ public class Event implements Comparable<Event> {
 			initLangExt();
 		String path = this.exoName + "." + langExt.get(this.exoLang) + ".code" ;
 		code = LocalRepository.getFileContent(path, this.commit);
+		if (code == null) // FIXME: we should understand why this is null instead
+			code = "";
 	}
 
 	public void setError() throws MissingObjectException, IncorrectObjectTypeException, CorruptObjectException, IOException {
